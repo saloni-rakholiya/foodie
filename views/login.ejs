@@ -1,0 +1,22 @@
+<%- include("partials/header") -%>
+<h3 class="text-center">Login</h3>
+
+<form method="POST" action="/login" class="align-items-center text-center">
+  <div class="form-row text-center">
+    <div class="form-group col-md-12">
+      <label for="username">Email</label>
+      <input type="email" class="form-control" id="username" name="username" placeholder="Email">
+    </div>
+  </div>
+  <div class="form-row text-center">
+  <div class="form-group col-md-12">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+  </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Sign in</button>
+</form>
+
+<p class="text-center">Don't Have an Account? <a href="/register">Click Here</a> to Create One!</p>
+
+<%- include("partials/footer") -%>
