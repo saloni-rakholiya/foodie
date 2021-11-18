@@ -23,7 +23,23 @@
    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 </head>
+<style>
+.fa-flag:hover {
+    color: rgb(128, 4, 4);
+}
 
+.fa-flag {
+    color: red;
+}
+
+.fa-flag-pos:hover {
+    color: rgb(35, 53, 9);
+}
+
+.fa-flag-pos {
+    color: green;
+}
+</style>
 <body>
   <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark">
   		  	<a class="navbar-brand" href="/home" id="companyName" style="color: #E7F3FF; font-family: 'Raleway', sans-serif;">
@@ -35,34 +51,53 @@
   		  	<div class="collapse navbar-collapse" id="navbarSupportedContent" style="margin-right: 5%">
   		    	<ul class="navbar-nav ml-auto">
   					<li class="nav-item">
-  		        		<a class="nav-link" href="/cart" style="color: #E7F3FF; font-family: 'Raleway', sans-serif; font-size: 18px; padding-right: 20px;">Cart</a>
+  		        		<a class="nav-link" href="/cart" style=" font-family: 'Raleway', sans-serif; font-size: 18px; padding-right: 20px;">Cart</a>
   		      		</li>
   		      		<li class="nav-item">
-  		        		<a class="nav-link" href="/contact" style="color: #E7F3FF; padding-right: 20px; font-family: 'Raleway', sans-serif; font-size: 18px;", sans-serif">Contact</a>
+  		        		<a class="nav-link" href="/contact" style=" padding-right: 20px; font-family: 'Raleway', sans-serif; font-size: 18px;", sans-serif">Contact</a>
   		      		</li>
   		      		<li class="nav-item">
-  		        		<a class="nav-link" href="/history" style="color: #E7F3FF; font-family: 'Raleway', sans-serif; padding-right: 20px; font-size: 18px">History</a>
+  		        		<a class="nav-link" href="/history" style=" font-family: 'Raleway', sans-serif; padding-right: 20px; font-size: 18px">History</a>
   		      		</li>
   		      		<li class="nav-item">
-  		        		<a class="nav-link" href="/about" style="color: #E7F3FF; padding-right: 20px; font-size: 18px; font-family: 'Raleway', sans-serif;">About</a>
+  		        		<a class="nav-link" href="/about" style=" padding-right: 20px; font-size: 18px; font-family: 'Raleway', sans-serif;">About</a>
   					  </li>
   		      		<li class="nav-item">
-  		        		<a class="nav-link" href="/logout" style="color: #E7F3FF; padding-right: 10px; font-size: 18px; font-family: 'Raleway', sans-serif; padding-right: 20px;">Logout</a>
+  		        		<a class="nav-link" href="/logout" style=" padding-right: 10px; font-size: 18px; font-family: 'Raleway', sans-serif; padding-right: 20px;">Logout</a>
   		      		</li>
   		    	</ul>
   		  	</div>
   	</nav>
 
-    <p>cart</p>
-		<div class="card w-75">
-	  <div class="card-body">
+	  <h2 class="text-center">My Cart</h2>
+	<% for (var i=0;i<10;++i) { %>
+	<div class="card w-75 container">
+	  <div class="card-body row">
+		<div class="col-3 text-center m-auto mt-1">
+		<img src="https://www.jquery-az.com/html/images/banana.jpg" width="95%">
+		</div>
+		<div class="col-6">
 	    <h5 class="card-title">Card title</h5>
-	    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-	    <a href="#" class="btn btn-primary">Button</a>
+	    <p class="card-text">With supporting text below as a natural lead-in to additional contentWith supporting text below as a natural lead-in to additional content With supporting text below as a natural lead-in to additional contentWith supporting text below as a natural lead-in to additional content With supporting text below as a natural lead-in to additional content With supporting text below as a natural lead-in to additional content.</p>
+	    <a href="#" class="btn btn-default p-0">
+			<span><i class="fa fa-plus-square fa-flag-pos" style="font-size: 30px"></i></span>
+		</a>
+		<a href="#" class="btn btn-default p-0 m-1">
+			<span><i class="fa fa-minus-square fa-flag" style="font-size: 30px"></i></span>
+		</a>
+		</div>
+
+		<div class="col-3 text-center">
+	    <button type="button" class="btn btn-default m-2">  
+		<span><i class="fa fa-trash fa-flag" style="font-size: 40px"></i></span>
+        </button>
+		<h5 class="text-center">1</h5>
+		<p class="text-center">Rs. 500</p>
+		</div>
 	  </div>
 	</div>
 
-	
+	<% } %>
 	
 </body>
 </html>
