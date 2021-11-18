@@ -3,12 +3,10 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = 3001;
 const { User } = require("./models/user");
-// const session = require("express-session");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
-// const passport = require("passport");
-// const passportLocalMongoose = require("passport-local-mongoose");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 var Product = require("./models/product");
 var Cart = require("./models/cart");
@@ -27,63 +25,12 @@ app.use(
     // allowedHeaders: ['Authorization']
   })
 );
-
-// app.use(
-//   session({
-//     secret: "some long string,",
-//     resave: false,
-//     saveUninitialized: false,
-//   })
-// );
-
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(cookieParser());
 
 mongoose.connect("mongodb://localhost:27017/shoppin", {
   useNewUrlParser: true,
 });
-// mongoose.set('useCreateIndex', true);
-
-//seed
-// var userSchema = new mongoose.Schema({
-//   username: String,
-//   password: String,
-//   name: { type: String, required: true },
-//   city: { type: String, required: true },
-//   state: { type: String, required: true },
-//   cart: { type: Object, required: true },
-// });
-
-// userSchema.plugin(passportLocalMongoose);
-
-// passport.use(User.createStrategy());
-// passport.serializeUser((req, user, done) => {
-//   console.log("ser");
-//   console.log(req.cart);
-//   if (req.cart == undefined) {
-//     console.log("m");
-//     done(null, user.id);
-//   } else {
-//     done(null, { id: user.id, cart: req.cart });
-//   }
-// });
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
-
-// const isLoggedIn = (req, res, next) => {
-//   if (req.isAuthenticated()) {
-//     if (req.session.cart == undefined) {
-//       req.session.cart = new Cart({});
-//     }
-//     next();
-//   } else {
-//     res.redirect("/login");
-//   }
-// };
-
-const authRouter = express.Router();
-// authRouter.use(isLoggedIn);
-app.use("/auth", authRouter);
+// mongoose.set("useCreateIndex", true);
 
 // app.get("/", (req, res) => {
 //   res.redirect("/welcome");
@@ -91,10 +38,6 @@ app.use("/auth", authRouter);
 
 // app.get("/welcome", (req, res) => {
 //   res.render("welcome.ejs");
-// });
-
-// app.get("/login", (req, res) => {
-//   res.render("login.ejs");
 // });
 
 app.post("/login", async (req, res) => {
@@ -107,7 +50,7 @@ app.post("/login", async (req, res) => {
     return res.json({ status: false, message: "Wrong password" });
   }
   const token = jwt.sign({ id: user._id }, "JWT-SECRET");
-  res.cookie("FoodAuth", { maxAge: 86400, httpOnly: true });
+  res.cookie("FoodAuth", token, { maxAge: 86400, httpOnly: true });
   return res.json({ status: true, message: "Success" });
 });
 
@@ -150,6 +93,19 @@ app.post("/register", async (req, res) => {
   console.log(user);
   await user.save();
   return res.json({ status: true });
+});
+
+app.options("/checkauth");
+
+app.get("/checkauth", async (req, res) => {
+  const foodCookie = req.cookies["FoodAuth"];
+  if (!foodCookie) {
+    return res.json({ status: false });
+  }
+  if (jwt.verify(foodCookie, "JWT-SECRET")) {
+    return res.json({ status: true });
+  }
+  return res.json({ status: false });
 });
 
 // app.get("/secret", (req, res) => {
