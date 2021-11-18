@@ -49,8 +49,10 @@ app.post("/login", async (req, res) => {
   if (!user.validPassword(password)) {
     return res.json({ status: false, message: "Wrong password" });
   }
-  const token = jwt.sign({ id: user._id }, "JWT-SECRET");
-  res.cookie("FoodAuth", token, { maxAge: 86400, httpOnly: true });
+  const token = jwt.sign({ id: user._id }, "JWT-SECRET", {
+    expiresIn: "1 day",
+  });
+  res.cookie("FoodAuth", token, { maxAge: 86400 * 1000, httpOnly: true });
   return res.json({ status: true, message: "Success" });
 });
 
