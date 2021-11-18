@@ -93,16 +93,17 @@ app.post("/login", (req, res) => {
     password: req.body.password,
   });
 
-  req.login(user, (err) => {
-    if (err) {
-      console.log(err);
-      res.redirect("/login");
-    } else {
-      passport.authenticate("local")(req, res, () => {
-        res.redirect("/auth/home");
-      });
-    }
-  });
+  passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+    if (!user) { 
+       return res.redirect('login'); }
+
+    req.login(user, function(err) {
+      if (err) { return next(err); }
+      return res.redirect("/auth/home");
+    });
+
+  })(req, res, ()=>{;});
 });
 
 app.get("/logout", (req, res) => {
@@ -131,26 +132,17 @@ app.get("/contact", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  User.register(
-    {
-      username: req.body.username,
-      name: "heheh",
-      city: "longon",
-      state: "gujarat",
-      cart: new Cart({}),
-    },
-    req.body.password,
-    (err, user) => {
-      if (err) {
-        console.log(err);
-        res.redirect("/register");
-      } else {
-        passport.authenticate("local")(req, res, () => {
-          res.redirect("/auth/home");
-        });
-      }
-    }
-  );
+  User.register({username: req.body.username, name: req.body.name, city: req.body.city , state: req.body.state}, req.body.password, (err,user)=>{
+        if(err) {
+            console.log(err+"hi");
+            res.redirect("/register");
+        }
+        else {
+            passport.authenticate("local")(req,res,()=>{
+                res.redirect("/auth/home");
+            });
+        }
+    });
 });
 
 app.get("/secret", (req, res) => {
