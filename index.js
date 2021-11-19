@@ -97,8 +97,6 @@ app.post("/register", async (req, res) => {
   return res.json({ status: true });
 });
 
-app.options("/checkauth");
-
 app.get("/checkauth", async (req, res) => {
   const foodCookie = req.cookies["FoodAuth"];
   if (!foodCookie) {
@@ -108,6 +106,19 @@ app.get("/checkauth", async (req, res) => {
     return res.json({ status: true });
   }
   return res.json({ status: false });
+});
+
+// app.options("/");
+
+app.get("/getproducts", async (req, res) => {
+  const products = await Product.find();
+  console.log(products);
+  return res.json({ status: true, products });
+});
+
+app.get("/getinfo/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  return res.json({ status: true, product });
 });
 
 // app.get("/secret", (req, res) => {
