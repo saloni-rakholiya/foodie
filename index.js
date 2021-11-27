@@ -54,6 +54,33 @@ const getUser = async (req, res, next) => {
   }
 };
 
+app.post("/checkout",getUser, async (req,res)=>{
+  var cart = new Cart(req.body);
+  // console.log(req.user._id);
+  var order = await new Order({
+    user: req.user._id,
+    cart: cart,
+    address: req.user.city+" , "+req.user.state,
+    name: req.user.name,
+    paymentId: 'PAID',
+    date: getdatestr(),
+    time: gettimestr(),
+    preparing: true,
+    ontheway: false,
+    delivered: false
+  });
+
+  await order.save(function(err, result) {
+    if(err) {console.log(err);
+      return res.redirect('/');
+    }
+    else
+    console.log("done");
+  });
+
+  return res.json({status:true});
+});
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -72,11 +99,6 @@ app.post("/login", async (req, res) => {
   );
   res.cookie("FoodAuth", token, { maxAge: 86400 * 1000, httpOnly: true });
   return res.json({ status: true, message: "Success" });
-});
-
-app.get("/test", getUser, (req, res) => {
-  console.log(req.user);
-  return res.json({ status: true });
 });
 
 app.options("/register", cors());
@@ -103,8 +125,8 @@ app.get("/checkauth", async (req, res) => {
   try {
     const user = jwt.verify(foodCookie, "JWT-SECRET");
     if (user) {
-      console.log(user.isAdmin);
-      console.log(user);
+      // console.log(user.isAdmin);
+      // console.log(user);
       return res.json({ status: true, isAdmin: user.isAdmin });
     } else {
       return res.json({ status: false, isAdmin: false });
@@ -128,6 +150,35 @@ app.get("/logout", async (_req, res) => {
   res.cookie("FoodAuth", "", { maxAge: -1 });
   return res.json({ status: true });
 });
+
+//functions
+function getdatestr() {
+
+  var today = new Date();
+  var dd = today.getDate();
+
+  var mm = today.getMonth() + 1; 
+  var yyyy = today.getFullYear();
+
+  if (dd < 10) {
+      dd = '0' + dd;
+  } 
+
+  if (mm < 10 ) {
+      mm = '0' + mm;
+  }
+
+  today = dd + '/' + mm + '/' + yyyy;
+  return today;
+}
+
+function gettimestr() {
+  var d = new Date(),
+      h = (d.getHours()<10?'0':'') + d.getHours(),
+      m = (d.getMinutes()<10?'0':'') + d.getMinutes();
+  return (h + ':' + m);
+}
+//
 
 app.listen(PORT, () => {
   console.log("Listening on port " + PORT);
