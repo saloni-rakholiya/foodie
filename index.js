@@ -11,6 +11,7 @@ const cookieParser = require("cookie-parser");
 var Product = require("./models/product");
 var Cart = require("./models/cart");
 var Order = require("./models/order");
+const JWT_SECRET = "JWT-SECRET";
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -30,15 +31,28 @@ app.use(cookieParser());
 mongoose.connect("mongodb://localhost:27017/shoppin", {
   useNewUrlParser: true,
 });
-// mongoose.set("useCreateIndex", true);
 
-// app.get("/", (req, res) => {
-//   res.redirect("/welcome");
-// });
-
-// app.get("/welcome", (req, res) => {
-//   res.render("welcome.ejs");
-// });
+const getUser = async (req, res, next) => {
+  const foodCookie = req.cookies["FoodAuth"];
+  if (!foodCookie) {
+    return res.json({ status: false });
+  }
+  try {
+    const user = jwt.verify(foodCookie, JWT_SECRET);
+    if (!user) {
+      return res.json({ status: false });
+    }
+    const curUser = await User.findById(user.id);
+    if (!curUser) {
+      return res.json({ status: false });
+    } else {
+      req.user = curUser;
+      next();
+    }
+  } catch (e) {
+    return res.json({ status: false });
+  }
+};
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -56,30 +70,10 @@ app.post("/login", async (req, res) => {
   return res.json({ status: true, message: "Success" });
 });
 
-// app.get("/logout", (req, res) => {
-//   req.logout();
-//   res.redirect("welcome");
-// });
-
-// app.get("/register", (req, res) => {
-//   res.render("register.ejs");
-// });
-
-// app.get("/history", (req, res) => {
-//   res.render("history.ejs");
-// });
-
-// authRouter.get("/about", (req, res) => {
-//   res.render("about.ejs");
-// });
-
-// authRouter.get("/cart", (req, res) => {
-//   res.render("cart.ejs");
-// });
-
-// app.get("/contact", (req, res) => {
-//   res.render("contact.ejs");
-// });
+app.get("/test", getUser, (req, res) => {
+  console.log(req.user);
+  return res.json({ status: true });
+});
 
 app.options("/register", cors());
 
@@ -108,11 +102,8 @@ app.get("/checkauth", async (req, res) => {
   return res.json({ status: false });
 });
 
-// app.options("/");
-
 app.get("/getproducts", async (req, res) => {
   const products = await Product.find();
-  console.log(products);
   return res.json({ status: true, products });
 });
 
@@ -120,74 +111,6 @@ app.get("/getinfo/:id", async (req, res) => {
   const product = await Product.findById(req.params.id);
   return res.json({ status: true, product });
 });
-
-// app.get("/secret", (req, res) => {
-//   if (req.isAuthenticated()) {
-//     res.send("Secrets yay!");
-//   } else {
-//     res.redirect("/login");
-//   }
-// });
-
-// authRouter.get("/profile", async (req, res, next) => {
-//   try {
-//     const orders = await Order.find({
-//       user: req.user,
-//     });
-//     console.log(req.user);
-//     let cart;
-//     orders.forEach(function (order) {
-//       cart = new Cart(order.cart);
-//       order.items = cart.generateArray();
-//     });
-//     res.render("user/profile", {
-//       orders: orders,
-//       user: req.user,
-//     });
-//   } catch (err) {
-//     res.write("Error!");
-//   }
-// });
-
-// authRouter.get("/home", async (req, res) => {
-//   var productChunks = {};
-//   var successMsg = 1;
-
-//   const categories = await Product.distinct("category");
-//   for (const category of categories) {
-//     productChunks[category] = [];
-//     products = await Product.find({ category });
-//     for (const product of products) {
-//       productChunks[category].push(product);
-//     }
-//   }
-//   res.render("home.ejs", {
-//     title: "Food Ordering System",
-//     products: productChunks,
-//     successMsg: successMsg,
-//     noMessages: !successMsg,
-//     cart: req.session.cart,
-//   });
-// });
-
-// authRouter.post("/add-to-cart", async (req, res) => {
-//   const id = req.body.foodId;
-//   console.log(id);
-//   if (id == undefined) {
-//     return res.json({ status: false });
-//   }
-//   const product = await Product.findById(id);
-//   const cart = req.session.cart;
-//   var storedItem = cart.items[id];
-//   if (!storedItem) {
-//     storedItem = cart.items[id] = { item: product, qty: 0, price: 0 };
-//   }
-//   storedItem.qty++;
-//   storedItem.price = storedItem.item.price * storedItem.qty;
-//   cart.totalQty++;
-//   cart.totalPrice += storedItem.item.price;
-//   return res.json({ status: true });
-// });
 
 app.listen(PORT, () => {
   console.log("Listening on port " + PORT);
