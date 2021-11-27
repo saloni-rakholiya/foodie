@@ -63,9 +63,13 @@ app.post("/login", async (req, res) => {
   if (!user.validPassword(password)) {
     return res.json({ status: false, message: "Wrong password" });
   }
-  const token = jwt.sign({ id: user._id }, "JWT-SECRET", {
-    expiresIn: "1 day",
-  });
+  const token = jwt.sign(
+    { id: user._id, isAdmin: user.isAdmin },
+    "JWT-SECRET",
+    {
+      expiresIn: "1 day",
+    }
+  );
   res.cookie("FoodAuth", token, { maxAge: 86400 * 1000, httpOnly: true });
   return res.json({ status: true, message: "Success" });
 });
@@ -94,12 +98,20 @@ app.post("/register", async (req, res) => {
 app.get("/checkauth", async (req, res) => {
   const foodCookie = req.cookies["FoodAuth"];
   if (!foodCookie) {
-    return res.json({ status: false });
+    return res.json({ status: false, isAdmin: false });
   }
-  if (jwt.verify(foodCookie, "JWT-SECRET")) {
-    return res.json({ status: true });
+  try {
+    const user = jwt.verify(foodCookie, "JWT-SECRET");
+    if (user) {
+      console.log(user.isAdmin);
+      console.log(user);
+      return res.json({ status: true, isAdmin: user.isAdmin });
+    } else {
+      return res.json({ status: false, isAdmin: false });
+    }
+  } catch (e) {
+    return res.json({ status: false, isAdmin: false });
   }
-  return res.json({ status: false });
 });
 
 app.get("/getproducts", async (req, res) => {
@@ -110,6 +122,11 @@ app.get("/getproducts", async (req, res) => {
 app.get("/getinfo/:id", async (req, res) => {
   const product = await Product.findById(req.params.id);
   return res.json({ status: true, product });
+});
+
+app.get("/logout", async (_req, res) => {
+  res.cookie("FoodAuth", "", { maxAge: -1 });
+  return res.json({ status: true });
 });
 
 app.listen(PORT, () => {
