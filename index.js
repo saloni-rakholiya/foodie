@@ -7,6 +7,19 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    return cb(null, "./public");
+  },
+  filename: (req, file, cb) => {
+    return cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage });
 
 var Product = require("./models/product");
 var Cart = require("./models/cart");
@@ -149,7 +162,7 @@ app.get("/checkauth", async (req, res) => {
 });
 
 app.get("/getproducts", async (req, res) => {
-  const products = await Product.find();
+  const products = await Product.find().sort({ createdAt: "asc" }).exec();
   return res.json({ status: true, products });
 });
 
@@ -178,6 +191,49 @@ app.post("/changestatus", async (req, res) => {
     return res.json({ status: false });
   }
 });
+
+const checkAdmin = async (req, res, next) => {
+  const foodCookie = req.cookies["FoodAuth"];
+  if (!foodCookie) {
+    return res.json({ status: false });
+  }
+  try {
+    const user = jwt.verify(foodCookie, JWT_SECRET);
+    if (!user) {
+      return res.json({ status: false });
+    }
+    const curUser = await User.findById(user.id);
+    if (!curUser) {
+      return res.json({ status: false });
+    } else {
+      if (!curUser.isAdmin) {
+        return res.json({ status: false });
+      }
+      req.user = curUser;
+      next();
+    }
+  } catch (e) {
+    return res.json({ status: false });
+  }
+};
+
+app.post(
+  "/imageupload",
+  [checkAdmin, upload.single("file")],
+  async (req, res) => {
+    const file = req.file;
+    console.log(file);
+    const { title, description, price, category } = req.body;
+    await Product.create({
+      imagePath: `http://localhost:3001/${file.filename}`,
+      title,
+      description,
+      price,
+      category,
+    });
+    return res.json({ status: true });
+  }
+);
 
 //functions
 function getdatestr() {
