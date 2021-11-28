@@ -177,9 +177,10 @@ app.get("/logout", async (_req, res) => {
 });
 
 app.post("/changestatus", async (req, res) => {
+  // console.log( req.body.id);
   try {
     await Order.findOneAndUpdate(
-      { id: req.body.id },
+      { _id: req.body.id },
       {
         preparing: req.body.status == "prep",
         ontheway: req.body.status == "on",
