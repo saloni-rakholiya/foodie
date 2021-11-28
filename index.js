@@ -54,37 +54,43 @@ const getUser = async (req, res, next) => {
   }
 };
 
-
 app.get("/getprevorders", getUser, async (req, res) => {
-  const products = await Order.find({user: req.user._id});
+  const products = await Order.find({ user: req.user._id });
   return res.json({ status: true, products });
 });
 
-app.post("/checkout",getUser, async (req,res)=>{
+app.post("/checkout", getUser, async (req, res) => {
   var cart = new Cart(req.body);
   // console.log(req.user._id);
   var order = await new Order({
     user: req.user._id,
     cart: cart,
-    address: req.user.city+" , "+req.user.state,
+    address: req.user.city + " , " + req.user.state,
     name: req.user.name,
-    paymentId: 'PAID',
+    paymentId: "PAID",
     date: getdatestr(),
     time: gettimestr(),
     preparing: true,
     ontheway: false,
-    delivered: false
+    delivered: false,
   });
 
-  await order.save(function(err, result) {
-    if(err) {console.log(err);
-      return res.redirect('/');
-    }
-    else
-    console.log("done");
+  await order.save(function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.redirect("/");
+    } else console.log("done");
   });
 
-  return res.json({status:true});
+  return res.json({ status: true });
+});
+
+app.get("/allOrders", getUser, async (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(401).json({ isAdmin: false });
+  }
+  const orders = await Order.find();
+  return res.json({ isAdmin: true, orders });
 });
 
 app.post("/login", async (req, res) => {
@@ -157,32 +163,47 @@ app.get("/logout", async (_req, res) => {
   return res.json({ status: true });
 });
 
+app.post("/changestatus", async (req, res) => {
+  try {
+    await Order.findOneAndUpdate(
+      { id: req.body.id },
+      {
+        preparing: req.body.status == "prep",
+        ontheway: req.body.status == "on",
+        delivered: req.body.status == "del",
+      }
+    );
+    return res.json({ status: true });
+  } catch (_e) {
+    return res.json({ status: false });
+  }
+});
+
 //functions
 function getdatestr() {
-
   var today = new Date();
   var dd = today.getDate();
 
-  var mm = today.getMonth() + 1; 
+  var mm = today.getMonth() + 1;
   var yyyy = today.getFullYear();
 
   if (dd < 10) {
-      dd = '0' + dd;
-  } 
-
-  if (mm < 10 ) {
-      mm = '0' + mm;
+    dd = "0" + dd;
   }
 
-  today = dd + '/' + mm + '/' + yyyy;
+  if (mm < 10) {
+    mm = "0" + mm;
+  }
+
+  today = dd + "/" + mm + "/" + yyyy;
   return today;
 }
 
 function gettimestr() {
   var d = new Date(),
-      h = (d.getHours()<10?'0':'') + d.getHours(),
-      m = (d.getMinutes()<10?'0':'') + d.getMinutes();
-  return (h + ':' + m);
+    h = (d.getHours() < 10 ? "0" : "") + d.getHours(),
+    m = (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
+  return h + ":" + m;
 }
 //
 
