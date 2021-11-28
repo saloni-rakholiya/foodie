@@ -110,10 +110,10 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user == null) {
-    return res.json({ status: false, message: "Not found" });
+    return res.json({ status: false, id: -1, message: "Not found" });
   }
   if (!user.validPassword(password)) {
-    return res.json({ status: false, message: "Wrong password" });
+    return res.json({ status: false, id: -1, message: "Wrong password" });
   }
   const token = jwt.sign(
     { id: user._id, isAdmin: user.isAdmin },
@@ -123,7 +123,7 @@ app.post("/login", async (req, res) => {
     }
   );
   res.cookie("FoodAuth", token, { maxAge: 86400 * 1000, httpOnly: true });
-  return res.json({ status: true, message: "Success" });
+  return res.json({ status: true, id: user._id, message: "Success" });
 });
 
 app.options("/register", cors());
@@ -145,19 +145,19 @@ app.post("/register", async (req, res) => {
 app.get("/checkauth", async (req, res) => {
   const foodCookie = req.cookies["FoodAuth"];
   if (!foodCookie) {
-    return res.json({ status: false, isAdmin: false });
+    return res.json({ status: false, isAdmin: false, id: -1 });
   }
   try {
     const user = jwt.verify(foodCookie, "JWT-SECRET");
     if (user) {
       // console.log(user.isAdmin);
       // console.log(user);
-      return res.json({ status: true, isAdmin: user.isAdmin });
+      return res.json({ status: true, isAdmin: user.isAdmin, id: user.id });
     } else {
-      return res.json({ status: false, isAdmin: false });
+      return res.json({ status: false, isAdmin: false, id: -1 });
     }
   } catch (e) {
-    return res.json({ status: false, isAdmin: false });
+    return res.json({ status: false, isAdmin: false, id: -1 });
   }
 });
 
