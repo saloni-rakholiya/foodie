@@ -54,6 +54,12 @@ const getUser = async (req, res, next) => {
   }
 };
 
+
+app.get("/getprevorders", getUser, async (req, res) => {
+  const products = await Order.find({user: req.user._id});
+  return res.json({ status: true, products });
+});
+
 app.post("/checkout",getUser, async (req,res)=>{
   var cart = new Cart(req.body);
   // console.log(req.user._id);
