@@ -72,13 +72,17 @@ app.get("/getprevorders", getUser, async (req, res) => {
   return res.json({ status: true, products });
 });
 
+app.get("/getuserdets", getUser, async (req, res) => {
+  return res.json({ status: true, user:req.user });
+});
+
 app.post("/checkout", getUser, async (req, res) => {
-  var cart = new Cart(req.body);
-  // console.log(req.user._id);
+  var cart = new Cart(req.body.currcart);
+
   var order = await new Order({
     user: req.user._id,
     cart: cart,
-    address: req.user.city + " , " + req.user.state,
+    address: req.body.curaddress+","+req.user.city + " , " + req.user.state,
     name: req.user.name,
     paymentId: "PAID",
     date: getdatestr(),
