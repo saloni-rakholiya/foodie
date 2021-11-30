@@ -68,12 +68,13 @@ const getUser = async (req, res, next) => {
 };
 
 app.get("/getprevorders", getUser, async (req, res) => {
-  const products = await Order.find({ user: req.user._id });
+  const products = await Order.find({ user: req.user._id }).sort({createdAt: "desc"}).exec();
+  console.log(products);
   return res.json({ status: true, products });
 });
 
 app.get("/getuserdets", getUser, async (req, res) => {
-  return res.json({ status: true, user:req.user });
+  return res.json({ status: true, user: req.user });
 });
 
 app.post("/checkout", getUser, async (req, res) => {
@@ -82,7 +83,7 @@ app.post("/checkout", getUser, async (req, res) => {
   var order = await new Order({
     user: req.user._id,
     cart: cart,
-    address: req.body.curaddress+","+req.user.city + " , " + req.user.state,
+    address: req.body.curaddress + "," + req.user.city + " , " + req.user.state,
     name: req.user.name,
     paymentId: "PAID",
     date: getdatestr(),
