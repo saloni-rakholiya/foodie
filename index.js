@@ -69,7 +69,7 @@ const getUser = async (req, res, next) => {
 
 app.get("/getprevorders", getUser, async (req, res) => {
   const products = await Order.find({ user: req.user._id }).sort({createdAt: "desc"}).exec();
-  console.log(products);
+  // console.log(products);
   return res.json({ status: true, products });
 });
 
@@ -83,7 +83,7 @@ app.post("/checkout", getUser, async (req, res) => {
   var order = await new Order({
     user: req.user._id,
     cart: cart,
-    address: req.body.curaddress + "," + req.user.city + " , " + req.user.state,
+    address: req.body.curaddress,
     name: req.user.name,
     paymentId: "PAID",
     date: getdatestr(),
@@ -134,7 +134,7 @@ app.post("/login", async (req, res) => {
 app.options("/register", cors());
 
 app.post("/register", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const user = new User({
     email: req.body.email,
     name: req.body.name,
@@ -142,7 +142,7 @@ app.post("/register", async (req, res) => {
     state: req.body.state,
   });
   user.password = user.encryptPassword(req.body.password);
-  console.log(user);
+  // console.log(user);
   await user.save();
   return res.json({ status: true });
 });
@@ -228,7 +228,7 @@ app.post(
   [checkAdmin, upload.single("file")],
   async (req, res) => {
     const file = req.file;
-    console.log(file);
+    // console.log(file);
     const { title, description, price, category } = req.body;
     await Product.create({
       imagePath: `http://localhost:3001/${file.filename}`,
