@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -173,7 +172,17 @@ app.get("/checkauth", async (req, res) => {
 });
 
 app.get("/getproducts", async (req, res) => {
-  const products = await Product.find().sort({ createdAt: "asc" }).exec();
+  let cond = [{ user: null }];
+  const foodCookie = req.cookies["FoodAuth"];
+  if (foodCookie) {
+    const user = jwt.verify(foodCookie, JWT_SECRET);
+    if (user) {
+      cond.push({ user: user.id });
+    }
+  }
+  const products = await Product.find({ $or: cond })
+    .sort({ createdAt: "asc" })
+    .exec();
   return res.json({ status: true, products });
 });
 
@@ -246,6 +255,29 @@ app.post(
     return res.json({ status: true });
   }
 );
+
+app.post("/userpizza", getUser, async (req, res) => {
+  const { title, description, price, category, imagePath } = req.body;
+  const product = await Product.findOne({ title });
+  if (product) {
+    return res.json({
+      status: false,
+      message: "Product with same name already exists",
+    });
+  }
+  await Product.create({
+    title,
+    description,
+    price,
+    category,
+    imagePath,
+    user: req.user._id,
+  });
+  return res.json({
+    status: true,
+    message: "Product added successfully. Go to menu to  add to your cart",
+  });
+});
 
 app.post("/updatedetails", checkAdmin, async (req, res) => {
   upload.single("file")(req, res, async (err) => {
