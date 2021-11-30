@@ -247,6 +247,40 @@ app.post(
   }
 );
 
+app.post("/updatedetails", checkAdmin, async (req, res) => {
+  upload.single("file")(req, res, async (err) => {
+    if (!req.file) {
+      const { id, description, price, category, photoUrl } = req.body;
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.json({ status: false });
+      } else {
+        product.imagePath = photoUrl;
+        product.description = description;
+        product.price = price;
+        product.category = category;
+        await product.save();
+        return res.json({ status: true });
+      }
+    } else {
+      const file = req.file;
+      console.log(file);
+      const { id, description, price, category } = req.body;
+      const product = await Product.findById(id);
+      if (!product) {
+        return res.json({ status: false });
+      } else {
+        product.imagePath = `http://localhost:3001/${file.filename}`;
+        product.description = description;
+        product.price = price;
+        product.category = category;
+        await product.save();
+        return res.json({ status: true });
+      }
+    }
+  });
+});
+
 //functions
 function getdatestr() {
   var today = new Date();
