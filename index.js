@@ -280,6 +280,14 @@ app.post("/userpizza", getUser, async (req, res) => {
   });
 });
 
+app.post("/deleteitem", checkAdmin, async (req, res) => { 
+      const product = await Product.findOneAndRemove({_id:req.body.id},(err, doc)=>{
+        if(err) return res.json({status:false})
+      });
+      return res.json({ status: true });
+});
+
+
 app.post("/updatedetails", checkAdmin, async (req, res) => {
   upload.single("file")(req, res, async (err) => {
     if (!req.file) {
