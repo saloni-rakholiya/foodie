@@ -68,7 +68,9 @@ const getUser = async (req, res, next) => {
 };
 
 app.get("/getprevorders", getUser, async (req, res) => {
-  const products = await Order.find({ user: req.user._id }).sort({createdAt: "desc"}).exec();
+  const products = await Order.find({ user: req.user._id })
+    .sort({ createdAt: "desc" })
+    .exec();
   // console.log(products);
   return res.json({ status: true, products });
 });
@@ -135,6 +137,10 @@ app.options("/register", cors());
 
 app.post("/register", async (req, res) => {
   // console.log(req.body);
+  const curUser = await User.findOne({ email: req.body.email });
+  if (curUser) {
+    return res.json({ status: false });
+  }
   const user = new User({
     email: req.body.email,
     name: req.body.name,
