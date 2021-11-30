@@ -108,7 +108,8 @@ app.get("/allOrders", getUser, async (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(401).json({ isAdmin: false });
   }
-  const orders = await Order.find();
+  const orders = await Order.find().sort({ createdAt: "desc" })
+    .exec();
   return res.json({ isAdmin: true, orders });
 });
 
